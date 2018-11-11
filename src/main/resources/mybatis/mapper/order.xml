@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="order">
+
+	<!-- 사용자 주문 -->
+	<insert id="insertOrder" parameterType="com.lsm.web.order.OrderVO">
+			insert into orders 
+		(
+			o_code,
+			c_code,
+			m_id,
+			o_name,
+			o_phone,
+			o_purchase_method,
+			o_depositor,
+			o_receive_name,
+			o_receive_phone,
+			o_receive_post,
+			o_receive_main_address,
+			o_receive_sub_address,
+			o_requirements,
+			o_count,
+			o_product_amount,
+			o_coupon_save_amount,
+			o_shipping_fee,
+			o_use_point,
+			o_date,
+			o_status 
+		) values 
+		(
+			#{oCode},
+			#{cCode},
+			#{mId},
+			#{oName},
+			#{oPhone},
+			#{oPurchaseMethod},
+			#{oDepositor},
+			#{oReceiveName},
+			#{oReceivePhone},
+			#{oReceivePost},
+			#{oReceiveMainAddress},
+			#{oReceiveSubAddress},
+			#{oRequirements},
+			#{oCount},
+			#{oProductAmount},
+			#{oCouponSaveAmount},
+			#{oShippingFee},
+			#{oUsePoint},
+			now() ,
+			#{oStatus}
+		)
+		<selectKey resultType="String" keyProperty="oCode" order="AFTER">
+        	SELECT max(o_code) as o_code from orders
+   		</selectKey>
+	</insert>
+	
+	<!-- 사용자 주문 디테일  -->
+	<insert id="insertOrderDetail" parameterType="com.lsm.web.order.OrderVO">
+	insert into orders_detail 
+	(
+		o_code,
+		p_no, 
+		p_size, 
+		p_color, 
+		amount
+	) values 
+	(
+		#{oCode},
+		#{pNo},
+		#{pSize},
+		#{pColor},
+		#{amount}
+	);
+	</insert>
+	
+	<!-- 사용자 구매 수 증가  -->
+	<update id="updatePoint" parameterType="com.lsm.web.order.OrderVO">
+	update member set m_buy_count = m_buy_count+1 , m_buy_sum = #{oProductAmount}, m_point = #{oProductAmount} where m_id = #{mId};
+	</update>
+	
+	<!-- 사용자 주문 내역 리스트 -->
+	<select id="selectOrderList" resultType="com.lsm.web.order.OrderVO">
+	select o.o_code, o.o_date, p.p_img1, od.p_size, od.p_color, p.p_name, o.o_count, o.o_product_amount, s_name
+	from orders as o inner join orders_detail as od
+	on o.o_code = od.o_code
+	inner join product as p
+	on od.p_no = p.p_no
+	inner join status as s
+	on o.o_status = s.s_code
+	where o.m_id = #{mId}
+	group by o.o_code
+	order by o_date desc;
+	</select>
+	
+	<!-- 사용자 주문 디테일 -->
+	<select id="selectOrderDetailView" resultType="com.lsm.web.order.OrderVO">
+	select 
+		o.o_code, 
+		od.p_no, 
+		od.p_size, 
+		od.p_color, 
+		od.amount, 
+		p.p_img1, 
+		p.p_name, 
+		p.p_price, 
+		o_receive_name, 
+		o_receive_phone, 
+		o_receive_post, 
+		o_receive_main_address, 
+		o_receive_sub_address, 
+		o_requirements, 
+		o_count, 
+		o_product_amount, 
+		o_date, 
+		o_status,
+		s.s_name 
+	from 
+		orders as o 
+	inner join 
+		orders_detail as od
+	on 
+		o.o_code = od.o_code 
+	inner join 
+		product as p
+	on 
+		od.p_no = p.p_no
+	inner join
+		status as s
+	on
+		o.o_status = s.s_code	
+	where 
+		od.o_code = #{oCode};
+	</select>
+	
+	<!-- 받는사람 주문 정보 출력 -->
+	<select id="selectRecevieInfo" resultType="com.lsm.web.order.OrderVO">
+	select 
+		o_purchase_method as oPurchaseMethod, 
+		o_receive_name as oReceiveName, 
+		o_receive_phone as oReceivePhone, 
+		concat(o_receive_post,' ', o_receive_main_address,' ', o_receive_sub_address) as address, 
+		o_requirements as oRequirements 
+	from 
+		orders
+	where
+		o_code = #{oCode};
+	</select>
+	
+	
+	<!-- 관리자 주문 조회 -->
+	<select id="selectAdminOrderList" parameterType="hashmap" resultType="com.lsm.web.order.OrderVO">
+	select o.o_code, m_id, od.amount, p.p_name, o_receive_name, o_count, o_product_amount, o_purchase_method, o_date, o_status 
+	from orders as o inner join orders_detail as od
+	on o.o_code = od.o_code 
+	inner join product as p
+	on od.p_no = p.p_no
+	group by o_code
+    order by o_date desc
+	limit #{limit} offset #{offset}
+	</select>
+	
+	<!-- 관리자 주문 건수 페이징용 -->
+	<select id="selectAdminOrderCount" resultType="int">
+	select count(distinct(o.o_code)) as cnt
+	from orders as o inner join orders_detail as od
+	on o.o_code = od.o_code 
+	inner join product as p
+	on od.p_no = p.p_no;
+	</select>
+	
+	<!-- 관리자 주문 상세 보기 -->
+	<select id="selectAdminOrderDetail" resultType="com.lsm.web.order.OrderVO">
+	select 
+		od.p_no, 
+		od.p_size, 
+		od.p_color, 
+		od.amount, 
+		p.p_img1, 
+		p.p_name, 
+		p.p_price, 
+		o_date,
+        s.s_name
+	from 
+		orders as o 
+	inner join 
+		orders_detail as od
+	on 
+		o.o_code = od.o_code 
+	inner join 
+		product as p
+	on 
+		od.p_no = p.p_no
+    inner join
+		status as s
+    on
+		o.o_status = s.s_code
+	where 
+		od.o_code = #{oCode};
+	</select>
+	
+	<!-- 받는사람 주문 정보 출력 -->
+	<select id="selectAdminRecevieInfo" resultType="com.lsm.web.order.OrderVO">
+	select 
+		o_purchase_method as oPurchaseMethod, 
+		o_receive_name as oReceiveName, 
+		o_receive_phone as oReceivePhone, 
+		concat(o_receive_post,' ', o_receive_main_address,' ', o_receive_sub_address) as address, 
+		o_requirements as oRequirements 
+	from 
+		orders
+	where
+		o_code = #{oCode};
+	</select>
+	
+	<!-- 주문 후 장바구니 삭제 -->
+	<delete id="deleteOrderAfterCart">
+	delete from tbl_cart where c_no = ${cNo};
+	</delete>
+	
+	<!-- 주문 상태 출력 -->
+	<select id="selectStatus" resultType="com.lsm.web.order.OrderVO">
+	SELECT * FROM status;
+	</select>
+	
+	<!-- 관리자 주문 내역 검색  -->
+	<select id="selectAdminOrderSearch" parameterType="hashmap"  resultType="com.lsm.web.order.OrderVO">
+	select o.o_code, m_id, od.amount, p.p_name, o_receive_name, o_count, o_product_amount, o_purchase_method, o_date, o_status 
+	from orders as o inner join orders_detail as od
+	on o.o_code = od.o_code 
+	inner join product as p
+	on od.p_no = p.p_no
+	<where>
+		<if test="(startDate != null and startDate != '') and endDate != null and endDate != ''">
+			o_date BETWEEN #{startDate} AND #{endDate}
+		</if>
+		<if test="(keyword != null and keyword != '') and searchOption != null and searchOption != ''">
+			and #{searchOption} = #{keyword}
+		</if>
+	</where>
+	group by o_code
+    order by o_date desc
+    limit #{limit} offset #{offset};
+	</select>
+	
+	<!-- 관리자 주문 내역 결과 카운트  -->
+	<select id="selectAdminOrderSearchCount" parameterType="com.lsm.web.order.OrderSVO" resultType="int">
+	select count(distinct(o.o_code)) as resultcnt
+	from orders as o inner join orders_detail as od
+	on o.o_code = od.o_code 
+	inner join product as p
+	on od.p_no = p.p_no
+	<where>
+		<if test="(startDate != null and startDate != '') and endDate != null and endDate != ''">
+			o_date BETWEEN #{startDate} AND #{endDate}
+		</if>
+		<if test="(keyword != null and keyword != '') and searchOption != null and searchOption != ''">
+			and #{searchOption} = #{keyword}
+		</if>
+	</where>
+	</select>
+	
+	<!-- 주문 상태 변경 -->
+	<update id="updateOrderStatus" parameterType="com.lsm.web.order.OrderVO">
+	UPDATE orders SET o_status = #{oStatus} WHERE o_code = #{oCode};
+	</update>
+	
+	<!-- 주문 상태 변경 시 변경된 시간 업데이트  -->
+	<update id="updateDeliveryDate" parameterType="String">
+	UPDATE orders SET o_delivery_finish = now() WHERE o_code = #{oCode};
+	</update>
+	
+	<!-- 주문 후 구입금액 포인트 적립  -->
+	<update id="updateAddOrder" parameterType="com.lsm.web.order.OrderVO"> 
+	update 
+		member 
+	set 
+		m_buy_sum = m_buy_sum + (select o_product_amount from orders where o_code = #{oCode}),
+		m_buy_count = m_buy_count + 1, 
+		m_point = m_point + (select Floor(o_product_amount*0.1) as point from orders where o_code = #{oCode}) 
+	where 
+		m_id = #{mId};
+	</update>
+	
+	<!-- 상품 디테일에서 결제시 상품정보 출력   -->
+	<select id="selectPayOneProductInfo" parameterType="int" resultType="com.lsm.web.cart.CartVO">
+	select p_img1, p_name, p_price from product where p_no = #{pNo};
+	</select>
+	
+</mapper>

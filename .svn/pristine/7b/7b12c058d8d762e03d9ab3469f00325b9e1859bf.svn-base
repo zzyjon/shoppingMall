@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="product">
+
+	<!-- 상품등록페이지에서 1차 카테고리 뿌리기  -->
+	<select id="selectCategory" resultType="com.lsm.web.category.CategoryVO" >
+	select p_no, p_parents, p_child, p_name from product_category where p_parents = '000'
+	</select>
+	
+	<!-- 상품등록페이지에서 2차 카테고리 뿌리기  -->
+	<select id="selectChildCategory" parameterType="String" resultType="com.lsm.web.category.CategoryVO" >
+	select p_no, p_parents, p_child, p_name from product_category where p_parents = #{pCategroy};
+	</select>
+	
+	
+	<!-- 상품 등록 쿼리 -->
+	<insert id="insertProduct" parameterType="com.lsm.web.moosinsa.product.ProductVO" >
+	INSERT INTO product 
+	(
+	p_code, p_price, p_name, p_brand, p_stock, p_color, p_size, p_material, p_maker, p_desc, p_coupon_use_check, p_img1, p_img2, p_img3
+	) VALUES 
+	(
+	#{pCode}, #{pPrice}, #{pName}, #{pBrand}, #{pStock}, #{pColor}, #{pSize}, #{pMaterial}, #{pMaker}, #{pDesc}, #{pCouponUseCheck}, #{pImg1}, #{pImg2}, #{pImg3}
+	);
+	</insert>
+	
+	<!-- 상품 조회 -->
+	<select id="selectProductList" resultType="com.lsm.web.moosinsa.product.ProductVO">
+	select 
+	p_no, p_code, p_price, p_name, p_brand, p_stock, p_buy_count, p_color, p_size, p_material, p_maker, p_desc, p_coupon_use_check, p_publish_check 
+	from product;
+	</select>
+	
+	<!-- 상품 삭제 -->
+	<delete id="deleteProduct" parameterType="com.lsm.web.moosinsa.product.ProductVO">
+	 DELETE FROM product WHERE p_no = #{pNo};
+	</delete>
+	
+	<!-- 상품 상세 뷰 -->
+	<select id="selectProduct" parameterType="com.lsm.web.moosinsa.product.ProductVO" resultType="com.lsm.web.moosinsa.product.ProductVO">
+	select 
+	p_no, p_code, p_price, p_name, p_brand, p_stock, p_buy_count, p_color, p_size, p_material, p_maker, p_desc, p_coupon_use_check, p_publish_check 
+	from 
+	product 
+	where p_no = #{pNo};
+	</select>
+	
+	<!-- 상품 수정 -->
+	<update id="updateProduct" parameterType="com.lsm.web.moosinsa.product.ProductVO">
+	UPDATE product 
+	SET p_price = #{pPrice}, p_name = #{pName}, p_brand = #{pBrand},  p_stock = #{pStock},  p_color = #{pColor},  p_size = #{pSize},  p_material = #{pMaterial},  p_maker = #{pMaker},  p_desc = #{pDesc},  p_coupon_use_check = #{pCouponUseCheck} 
+	WHERE p_no = #{pNo};
+	</update>
+	
+	<!-- 등록된 상품 카운트 (페이징 처리용)-->
+	<select id="countProduct" parameterType="com.lsm.web.moosinsa.product.ProductSVO" resultType="Integer">
+	select count(p_no) as cnt from product
+	<if test="productType != null and productType != ''">
+	where p_code like concat(#{productType},'%')
+	</if>
+	<if test="keyword != null and keyword != ''">
+	where p_name like concat('%',#{keyword},'%')
+	</if>
+	</select>
+	
+	<!-- 유저사이트 상품 전체 뿌리기 -->
+	<select id="selectAllProduct" resultType="com.lsm.web.moosinsa.product.ProductVO">
+	select p_no, p_code, p_name, p_price, p_color, p_img1, p_img2, p_img3 from product;
+	</select>
+	
+	<!-- 유저사이트 상품종류별 뿌리기 -->
+	<select id="selectTypeProduct" parameterType="hashmap" resultType="com.lsm.web.moosinsa.product.ProductVO">
+	select p_no, p_code, p_name, p_price, p_color, p_img1
+	from product 
+	<if test="productType != null and productType != ''">
+	where p_code like concat(#{productType},'%')
+	</if>
+	<if test="orderType != null and orderType !=''"> ORDER BY
+
+	  <choose>
+	
+	    <when test="orderType eq 'pNo'"> p_no </when>
+	
+	    <when test="orderType eq 'pPrice'"> p_price </when>
+	
+	    <otherwise> p_buy_count </otherwise>
+	
+	  </choose> 
+	
+	  <choose>
+	
+	    <when test="sortType eq 'desc'"> DESC </when>
+	
+	    <otherwise> ASC </otherwise>
+	
+	  </choose>
+	
+	</if>
+	limit #{limit} offset #{offset}
+	</select>
+	
+	<!-- 상품 디테일 뷰 -->
+	<select id="selectProductDetailView" parameterType="com.lsm.web.moosinsa.product.ProductVO" resultType="com.lsm.web.moosinsa.product.ProductVO">
+	select p_no, p_code, p_name, p_price, p_stock, p_size, p_color, p_img1, p_img2, p_img3, p_desc
+	from product 
+	where p_no = #{pNo};
+	</select>
+	
+	
+	<!-- 유저사이트 상품 검색 -->
+	<select id="selectSearchProduct" parameterType="hashmap" resultType="com.lsm.web.moosinsa.product.ProductVO" >
+	select p_no, p_name, p_price, p_Img1 from product 
+	where p_name like concat('%', #{keyword},'%')
+	limit #{limit} offset #{offset} 
+	</select>
+	
+	
+	<!-- 유저사이트 상품 장바구니 추가  -->
+	<insert id="insertCart" parameterType="com.lsm.web.cart.CartVO">
+	INSERT INTO tbl_cart (m_id, p_no, amount, p_size ) VALUES (#{mId}, #{pNo}, #{amount}, #{pSize});
+	</insert>
+	
+	<!-- 유저사이트 상품 장바구니 추가시 중복 확인 -->
+	<select id="selectCartCheck" parameterType="com.lsm.web.cart.CartVO" resultType="int">
+	select count(*) from tbl_cart where m_id = #{mId} and p_no = #{pNo} and p_size = #{pSize};
+	</select>
+	
+	<!-- 유저사이트 장바구니 조회 -->
+	<select id="selectCartList" parameterType="String" resultType="com.lsm.web.cart.CartVO">
+	select c_no, p_name, p_img1, p.p_no, amount, t.p_size as pSize, p_price from product as p inner join tbl_cart as t
+	on p.p_no = t.p_no
+	where m_id = #{mId};
+	</select>
+		
+	<!-- 유저사이트 장바구니 총합  -->
+	<select id="sumCart" parameterType="String" resultType="int" >
+	SELECT IFNULL(SUM(p_price * amount),0) as money 
+	FROM tbl_cart as c inner join product as p
+    ON c.p_no = p.p_no 
+    WHERE c.m_id = #{mId};
+	</select>
+	
+	<!-- 유저사이트 장바구니 상품 갯수 수정 -->
+	<update id="updateCartAmount" parameterType="com.lsm.web.cart.CartVO">
+	UPDATE tbl_cart SET amount = #{amount} WHERE (c_no = #{cNo} and m_id = #{mId});
+	</update>
+	
+	<!-- 유저사이트 장바구니 상품 삭제 -->
+	<delete id="deleteCart" parameterType="int">
+	DELETE FROM tbl_cart where c_no = #{cNo}; 
+	</delete>
+	
+	<!-- 유저 정보 출력 -->
+	<select id="selectUserInfo" resultType="com.lsm.web.admin.AdminVO">
+	SELECT name, point from admin where id = #{id}
+	</select>
+	
+	<!-- 유저사이트 결제 상품 정보 출력 -->
+	<select id="selectProductInfo" resultType="com.lsm.web.cart.CartVO">
+	select p.p_no, p_name, p_price, amount, c.p_size, p_color, p_img1 
+	from product as p inner join tbl_cart as c
+	on p.p_no = c.p_no
+	where c.m_id = #{id};
+	</select>
+	
+	<!-- 유저사이트 결제 금액 총합  -->
+	<select id="sumOrder" parameterType="String" resultType="int" >
+	SELECT IFNULL(SUM(p_price * amount),0) as money 
+	FROM tbl_cart as c inner join product as p
+    ON c.p_no = p.p_no 
+    WHERE c.m_id = #{mId};
+	</select>
+	
+	<!-- 유저사이트 결제 상품 갯수 총합  -->
+	<select id="sumAmount" parameterType="String" resultType="int" >
+	SELECT IFNULL(SUM(amount),0) as amount 
+	FROM tbl_cart as c inner join product as p
+    ON c.p_no = p.p_no 
+    WHERE c.m_id = #{mId};
+	</select>
+	
+</mapper>
+

@@ -1,0 +1,109 @@
+package com.lsm.web.order;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.lsm.web.admin.AdminVO;
+import com.lsm.web.cart.CartVO;
+
+@Repository
+public class OrderDAO {
+
+	@Autowired
+	SqlSession session;
+	
+	/**
+	 * 유저 정보 출력
+	 * */
+	public AdminVO selectUserInfo(String id){
+		return session.selectOne("product.selectUserInfo", id);
+	}
+	
+	/**
+	 * 상품 정보 출력
+	 * */
+	public List<CartVO> selectProductInfo(String id) {
+		return session.selectList("product.selectProductInfo", id);
+	}
+	
+	/**
+	 * 상품 결제 총 금액
+	 * */
+	public int sumOrder(String id) {
+		return session.selectOne("product.sumOrder", id);
+	}
+	
+	/**
+	 * 결제 상품 총 갯수 
+	 * */
+	public int sumAmount(String id) {
+		return session.selectOne("product.sumAmount", id);
+	}
+	
+	/**
+	 * 상품 주문 
+	 * */
+	public int insertOrder(OrderVO vo) {
+		return session.insert("order.insertOrder", vo);
+	}
+	
+	/**
+	 * 상품 상세 주문
+	 * */
+	public int insertOrderDetail(OrderDetailVO vo) {
+		return session.insert("order.insertOrderDetail", vo);
+	}
+	
+	/**
+	 * 사용자 주문 내역 
+	 * */
+	public List<OrderVO> selectOrderList(String mId){
+		return session.selectList("order.selectOrderList", mId);
+	}
+	
+	/**
+	 * 사용자 주문 내역 디테일 뷰
+	 * */
+	public List<OrderVO> selectOrderDetailView(String oCode){
+		return session.selectList("order.selectOrderDetailView", oCode);
+	}
+	
+	/**
+	 * 받는사람 정보 출력
+	 * */
+	public OrderVO selectRecevieInfo(String oCode) {
+		return session.selectOne("order.selectRecevieInfo", oCode);
+	}
+	
+	/**
+	 * 관리자 주문 내역 조회
+	 * */
+	public List<OrderVO> selectAdminOrderList(){
+		return session.selectList("order.selectAdminOrderList");
+	}
+	
+	/**
+	 * 관리자 주문 상세 보기
+	 * */
+	public List<OrderVO> selectAdminOrderDetail(String oCode){
+		return session.selectList("order.selectAdminOrderDetail", oCode);
+	}
+	
+	/**
+	 * 관리자 주문자 상세 보기 
+	 * */
+	public OrderVO selectAdminRecevieInfo(String oCode) {
+		return session.selectOne("order.selectAdminRecevieInfo", oCode);
+	}
+	
+	/**
+	 * 사용자 주문 후 장바구니 삭제
+	 * */
+	public int deleteOrderAfterCart(int cNo) {
+		return session.delete("order.deleteOrderAfterCart", cNo);
+	}
+	
+}

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="board">
+
+	<!-- 리뷰 쓰기 -->
+	<insert id="insertReviewBoard" parameterType="com.lsm.web.board.ReviewVO" >
+	insert into review_board 
+	(p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_img1 ) 
+	values 
+	(#{pNo}, #{mId}, #{rWriter}, #{rTitle}, #{rContent}, #{rAvgScore}, #{rImg1} );
+	</insert>
+	
+	<!-- 상품 리뷰 전체 뿌리기 -->
+	<select id="selectReviewList" parameterType="hashmap" resultType="com.lsm.web.board.ReviewVO">
+	select r_no, p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_write_date , r_viewcount
+	from review_board
+	limit #{limit} offset #{offset}
+	</select>
+	
+	<!-- 상품별 리뷰 뿌리기 -->
+	<select id="selectProductReview" resultType="com.lsm.web.board.ReviewVO">
+	select r_no, p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_write_date 
+	from review_board
+	where p_no = #{pNo};
+	</select>
+	
+	<!-- 상품별 리뷰 갯수  -->
+	<select id="countProductReview" resultType="int">
+	select count(*) as cnt from review_board where p_no = #{pNo}; 
+	</select>
+	
+	<!-- 전체 리뷰글 갯수 페이징용 -->
+	<select id="countAllReview" resultType="int">
+	select count(*) as cnt from review_board
+	</select>
+	
+	<!-- 리뷰글 조회수 증가 -->
+	<update id="increaseViewCount">
+	update review_board set r_viewcount = r_viewcount + 1 where r_no = #{rNo};
+	</update>
+	
+	<!-- 리뷰글 디테일 뷰 -->
+	<select id="reviewDetailview" resultType="com.lsm.web.board.ReviewVO">
+	select r_no, p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_write_date , r_viewcount
+	from review_board 
+	where r_no = #{rNo};    
+	</select>
+	
+	<!-- 리뷰 수정 -->
+	<update id="updateReview" parameterType="com.lsm.web.board.ReviewVO">
+	UPDATE review_board 
+	SET r_title = #{rTitle}, r_content = #{rContent}, r_avg_score = #{rAvgScore} 
+	WHERE r_no = #{rNo};
+	</update>
+</mapper>
+

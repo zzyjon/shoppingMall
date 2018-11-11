@@ -1,0 +1,546 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+   pageEncoding="UTF-8"%>
+<%@ page trimDirectiveWhitespaces="true"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>기본설정관리</title>
+<!-- css 시작 -->
+<%@ include file="/WEB-INF/views/admin/include/css.jsp"%>
+<!-- css 끝 -->
+
+
+
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+   <div class="wrapper">
+      <!-- 해더파일 시작 -->
+      <%@ include file="/WEB-INF/views/admin/include/header.jsp"%>
+      <!-- 해더파일 끝 -->
+      <!-- Left side column. contains the logo and sidebar -->
+      <aside class="main-sidebar">
+         <!-- sidebar: style can be found in sidebar.less -->
+         <section class="sidebar">
+            <!-- Sidebar user panel -->
+            <!-- 왼쪽 유저 패널 시작 -->
+            <%@ include file="/WEB-INF/views/admin/include/user_panel.jsp"%>
+            <!-- 왼쪽 유저 패널 끝 -->
+            <!-- search form -->
+            <!-- 검색폼 시작 -->
+            <%@ include file="/WEB-INF/views/admin/include/search_form.jsp"%>
+            <!-- 검색폼 끝 -->
+            <!-- /.search form -->
+            <!-- sidebar menu: : style can be found in sidebar.less -->
+            <!-- 왼쪽 메뉴 시작 -->
+            <%@ include file="/WEB-INF/views/admin/include/left_menu/member_menu.jsp"%>
+            <!-- 왼쪽 메뉴 끝 -->
+         </section>
+         <!-- /.sidebar -->
+      </aside>
+
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+         <!-- Content Header (Page header) -->
+         <section class="content-header">
+            <h1>
+               회원관리 <small>회원조회</small>
+            </h1>
+            <ol class="breadcrumb">
+               <li><a href="#"><i class="fa fa-dashboard"></i> Home</a></li>
+               <li class="active">Dashboard</li>
+            </ol>
+         </section>
+
+         <!-- Main content -->
+         <form id="memberSearch" action="/admin/page/member/memberList1"
+            method="get">
+            <section class="content">
+
+               <!-- /.box -->
+               <!-- 검색조건 -->
+               <div class="box box-danger">
+                  <div class="box-header with-border">
+                     <h3 class="box-title">회원검색</h3>
+                  </div>
+                  <div class="box-body">
+                     <div class="row">
+                        <label for="#" class="col-md-2 control-label">키워드검색</label>
+                        <div class="col-md-2">
+                           <select class="form-control" name="memberSearchKeyType"
+                              id="memberSearchKeyType">
+                              <option value="">선택</option>
+                              <option value="all">통합검색</option>
+                              <option value="name">회원명</option>
+                              <option value="nick">닉네임</option>
+                              <option value="id">아이디</option>
+
+                           </select>
+
+                        </div>
+                        <div class="col-md-2">
+                           <input type="text" class="form-control"
+                              id="memberSearchKeyWord" name="memberSearchKeyWord"
+                              placeholder="검색어를 입력해주세요.">
+                        </div>
+                     </div>
+                  </div>
+                  <div class="box-body">
+                     <div class="row">
+                        <label for="#" class="col-md-2 control-label">구매금액</label>
+                        <div class="col-md-2">
+                           <input type="text" class="form-control" id="buySumMin"
+                              name="buySumMin" placeholder="최소금액">
+                        </div>
+                        <div class="col-md-2">
+                           <input type="text" class="form-control" id="buySumMax"
+                              name="buySumMax" placeholder="최대금액">
+                        </div>
+
+                        <label for="#" class="col-md-2 control-label">적립금</label>
+                        <div class="col-md-2">
+                           <input type="text" class="form-control" placeholder="최소금액"
+                              id="pointMin" name="pointMin">
+                        </div>
+                        <div class="col-md-2">
+                           <input type="text" class="form-control" placeholder="최대금액"
+                              id="pointMax" name="pointMax">
+                        </div>
+
+                     </div>
+                  </div>
+                  <div class="box-body">
+                     <div class="row">
+                        <label for="#" class="col-md-2 control-label">성별</label>
+
+                        <div class="col-md-4">
+                           <input type="radio" name="gender" value="M">남자 <input
+                              type="radio" name="gender" value="W">여자
+                        </div>
+                        <label for="#" class="col-md-2 control-label">방문횟수</label>
+                        <div class="col-md-2">
+                           <input type="text" class="form-control" placeholder="최소값"
+                              name="visitCountStart">
+                        </div>
+                        <div class="col-md-2">
+                           <input type="text" class="form-control" placeholder="최대값"
+                              name="visitCountEnd">
+                        </div>
+                     </div>
+
+                  </div>
+
+                  <div class="box-body">
+                     <div class="row">
+                        <label for="#" class="col-md-2 control-label">가입일</label>
+                        <div class="col-md-2">
+                           <div class="input-group date">
+                              <input type="text" class="form-control" placeholder="회원가입날짜"
+                                 id="regDateStart" name=regDateStart>
+                           </div>
+                        </div>
+                        <div class="col-md-2">
+                           <div class="input-group date">
+                              <input type="text" class="form-control" placeholder="시작일"
+                                 id="regDateEnd" name="regDateEnd">
+                           </div>
+                        </div>
+                        <label for="#" class="col-md-2 control-label">최종로그인</label>
+                        <div class="col-md-2">
+                           <div class="input-group date">
+                              <input type="text" class="form-control pull-right"
+                                 placeholder="로그인날짜" id="loginDateStart" name="loginDateStart">
+                           </div>
+                        </div>
+                        <div class="col-md-2">
+                           <div class="input-group date">
+                              <input type="text" class="form-control" placeholder="로그인날짜"
+                                 id="loginDateEnd" name="loginDateEnd">
+                           </div>
+                        </div>
+                     </div>
+
+                  </div>
+                  <td colspan="3">
+               </div>
+            </section>
+            <!-- 검색조건 끝-->
+
+            <!-- 검색버튼 -->
+            <div class="">
+               <button type="button" id="btnSearch">검색</button>
+            </div>
+
+         </form>
+
+
+
+         <!-- 회원리스트 테이블 -->
+         <section class="content">
+
+            <div class="row">
+               <div class="col-xs-12">
+                  <div class="box">
+                     <div class="box-header">
+                        <h3 class="box-title">회원리스트</h3>
+                     </div>
+                     <!-- /.box-header -->
+                     <div class="box-body">
+                        <table id="form-data" class="table table-bordered table-hover">
+                           <thead>
+                              <tr>
+                                 <th>번호</th>
+                                 <th>아이디</th>
+                                 <th>이름</th>
+                                 <th>상세정보</th>
+                                 <th>별명</th>
+                                 <th>등급</th>
+                                 <th>적립금</th>
+                                 <th>구매금액</th>
+                                 <th>방문횟수</th>
+                                 <th>가입일</th>
+                                 <th>최종로그인</th>
+                                 <th>수정</th>
+                                 <th>삭제</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                              <c:forEach var="member" items="${list }">
+                                 <tr>
+                                    <td>${member.mNo }</td>
+                                    <td>${member.mId }</td>
+                                    <td>${member.mName }</td>
+                                    <td>
+                                       <!-- Button trigger modal -->
+                                       <button type="button" class="btn btn-default btn-SM"
+                                          data-toggle="modal" data-target="#myModal${member.mNo }">상세정보</button>
+                                       <!-- 모달제어 -->
+                                       <div class="modal fade" id="myModal${member.mNo }"
+                                          tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                                          aria-hidden="true">
+                                          <div class="modal-dialog modal-lg">
+                                             <div class="modal-content">
+                                                <div class="modal-header">
+                                                   <button type="button" class="close"
+                                                      data-dismiss="modal" aria-label="Close">
+                                                      <span aria-hidden="true">&times;</span>
+                                                   </button>
+                                                   <h4 class="modal-title" id="myModalLabel">${member.mName }님의
+                                                      상세정보</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">번호</label>
+                                                      <div class="col-md-4">${member.mNo }</div>
+                                                      <label for="#" class="col-md-2 control-label">아이디</label>
+                                                      <div class="col-md-4">${member.mId }</div>
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">이름</label>
+                                                      <div class="col-md-4">${member.mName }</div>
+                                                      <label for="#" class="col-md-2 control-label">별명</label>
+                                                      <div class="col-md-4">${member.mNick }</div>
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">성별</label>
+                                                      <div class="col-md-4">${member.mGender }</div>
+                                                      <label for="#" class="col-md-2 control-label">생년월일</label>
+                                                      <div class="col-md-4">${member.mBirth }</div>
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">이메일</label>
+                                                      <div class="col-md-4">${member.mEmail }</div>
+                                                      <label for="#" class="col-md-2 control-label">전화번호</label>
+                                                      <div class="col-md-4">${member.mPhone }</div>
+
+                                                   </div>
+                                                   <div class="modal-body">
+                                                      <label for="#" class="col-md-2 control-label">방문횟수</label>
+                                                      <div class="col-md-4">${member.mVisitCount }</div>
+
+                                                      <label for="#" class="col-md-2 control-label">우편번호</label>
+                                                      <div class="col-md-4">${member.mPost }</div>
+
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">기본주소</label>
+                                                      <div class="col-md-10">${member.mMainAddress }</div>
+
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">상세주소</label>
+                                                      <div class="col-md-10">${member.mSubAddress }</div>
+
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">구매합계</label>
+                                                      <div class="col-md-4">${member.mBuySum }</div>
+                                                      <label for="#" class="col-md-2 control-label">적립금</label>
+                                                      <div class="col-md-4">${member.mPoint }</div>
+
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">회원가입날짜</label>
+                                                      <div class="col-md-4">${member.mRegDate }</div>
+                                                      <label for="#" class="col-md-2 control-label">회원탈퇴날짜</label>
+                                                      <div class="col-md-4">${member.mOutDate }</div>
+
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">마지막로그인</label>
+                                                      <div class="col-md-4">${member.mLoginDate }</div>
+                                                      <label for="#" class="col-md-2 control-label">회원정지날짜</label>
+                                                      <div class="col-md-4">${member.mBannDate }</div>
+
+
+                                                   </div>
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                   <button type="button" class="btn btn-default"
+                                                      data-dismiss="modal">닫기</button>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div> <!-- 모달제어 끝-->
+                                    </td>
+                                    <td>${member.mNick }</td>
+                                    <td>${member.mGrade }</td>
+                                    <td>${member.mPoint }</td>
+                                    <td>${member.mBuySum }</td>
+                                    <td>${member.mVisitCount }</td>
+                                    <td>${member.mRegDate }</td>
+                                    <td>${member.mLoginDate }</td>
+                                    <td><button type="button"
+                                          class="btn btn-default btn-SM" data-toggle="modal"
+                                          data-target="#modalModify${member.mNo }">수정</button> <!-- 모달제어 -->
+                                       <div class="modal fade" id="modalModify${member.mNo }"
+                                          tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                                          aria-hidden="true">
+                                          <div class="modal-dialog modal-lg">
+                                             <div class="modal-content">
+                                                <div class="modal-header">
+                                                   <button type="button" class="close"
+                                                      data-dismiss="modal" aria-label="Close">
+                                                      <span aria-hidden="true">&times;</span>
+                                                   </button>
+                                                   <h4 class="modal-title" id="myModalLabel">${member.mName }님의
+                                                      정보 수정</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">번호</label>
+                                                      <div class="col-md-4">${member.mNo }</div>
+                                                      <label for="#" class="col-md-2 control-label">아이디</label>
+                                                      <div class="col-md-4">${member.mId }</div>
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">이름</label>
+                                                      <div class="col-md-4"><input type="text" value="${member.mName }"></div>
+                                                      <label for="#" class="col-md-2 control-label">별명</label>
+                                                      <div class="col-md-4">${member.mNick }</div>
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">성별</label>
+                                                      <div class="col-md-4">${member.mGender }</div>
+                                                      <label for="#" class="col-md-2 control-label">생년월일</label>
+                                                      <div class="col-md-4">${member.mBirth }</div>
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">이메일</label>
+                                                      <div class="col-md-4">${member.mEmail }</div>
+                                                      <label for="#" class="col-md-2 control-label">전화번호</label>
+                                                      <div class="col-md-4">${member.mPhone }</div>
+
+                                                   </div>
+                                                   <div class="modal-body">
+                                                      <label for="#" class="col-md-2 control-label">방문횟수</label>
+                                                      <div class="col-md-4">${member.mVisitCount }</div>
+
+                                                      <label for="#" class="col-md-2 control-label">우편번호</label>
+                                                      <div class="col-md-4">${member.mPost }</div>
+
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">기본주소</label>
+                                                      <div class="col-md-10">${member.mMainAddress }</div>
+
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">상세주소</label>
+                                                      <div class="col-md-10">${member.mSubAddress }</div>
+
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">구매합계</label>
+                                                      <div class="col-md-4">${member.mBuySum }</div>
+                                                      <label for="#" class="col-md-2 control-label">적립금</label>
+                                                      <div class="col-md-4">${member.mPoint }</div>
+
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">회원가입날짜</label>
+                                                      <div class="col-md-4">${member.mRegDate }</div>
+                                                      <label for="#" class="col-md-2 control-label">회원탈퇴날짜</label>
+                                                      <div class="col-md-4">${member.mOutDate }</div>
+
+
+                                                   </div>
+                                                   <div class="modal-body">
+
+                                                      <label for="#" class="col-md-2 control-label">마지막로그인</label>
+                                                      <div class="col-md-4">${member.mLoginDate }</div>
+                                                      <label for="#" class="col-md-2 control-label">회원정지날짜</label>
+                                                      <div class="col-md-4">${member.mBannDate }</div>
+
+
+                                                   </div>
+
+                                                </div>
+                                                <div class="modal-footer">
+                                                   <button type="button" class="btn btn-default"
+                                                      data-dismiss="modal">닫기</button>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       </div> <!-- 모달제어 끝--></td>
+                                    <td><input type="button" value="삭제" class="delete" 
+                                       data-mNo="${member.mNo }"></td>
+                                 </tr>
+                              </c:forEach>
+
+
+
+
+                           </tbody>
+
+                        </table>
+                     </div>
+                     <!-- /.box-body -->
+                  </div>
+
+
+               </div>
+            </div>
+         </section>
+         <!-- /.content -->
+      </div>
+      <!-- /.content-wrapper -->
+
+      <!-- Control Sidebar 오른쪽 설정버튼 시작  -->
+      <%@ include file="/WEB-INF/views/admin/include/sidebar_menu.jsp"%>
+      <!-- /.control-sidebar 오른쪽 설정버튼 끝 -->
+      <!-- Add the sidebar's background. This div must be placed
+       immediately after the control sidebar -->
+      <div class="control-sidebar-bg"></div>
+   </div>
+   <!-- ./wrapper -->
+   <!-- 자바스크립트 시작 -->
+   <%@ include file="/WEB-INF/views/admin/include/js.jsp"%>
+   <script type="text/javascript">
+      $(document).ready(function() {
+         //회원삭제기능
+         $(".delete").click(function() {
+         var click = $(this).attr("data-mNo");
+            if (confirm("정말 삭제하시겠습니까?")){
+               
+            $.ajax({
+               url : "/admin/page/member/memberDel",
+               type : "post",
+               data : {
+                  "mNo" : click
+               },
+               success : function(data) {
+                  alert("삭제성공");
+                  location.reload();
+
+               },
+               error : function(data) {
+                  alert("삭제실패")
+               }
+
+            });
+            }
+
+         });
+         $("#btnSearch").click(function() {
+            //키워드 검색어
+            $("#memberSearchKeyWord").val();
+
+            $("#memberSearch").submit();
+         });
+
+         //Date picker
+         //회원가입날짜
+         $('#regDateStart').datepicker({
+            format : "yyyy-mm-dd",
+            autoclose : true
+         });
+         $('#regDateEnd').datepicker({
+            format : "yyyy-mm-dd",
+            autoclose : true
+         });
+         //마지막로그인날짜
+         $('#loginDateStart').datepicker({
+            format : "yyyy-mm-dd",
+            autoclose : true
+         });
+         $('#loginDateEnd').datepicker({
+            format : "yyyy-mm-dd",
+            autoclose : true
+         });
+
+         //datatable
+         $('#form-data').DataTable({
+            'paging' : true,
+            'lengthChange' : true,
+            'searching' : false,
+            'ordering' : true,
+            'info' : true,
+            'autoWidth' : true
+         });
+
+      });
+   </script>
+   <!-- 자바스크립트 끝 -->
+
+</body>
+<!-- 푸터 시작 -->
+<%@ include file="/WEB-INF/views/admin/include/footer.jsp"%>
+<!-- 푸터 끝 -->
+</html>

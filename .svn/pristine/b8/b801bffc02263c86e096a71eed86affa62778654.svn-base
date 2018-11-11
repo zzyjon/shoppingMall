@@ -1,0 +1,43 @@
+package com.lsm.web.user.product;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class UserProductController {
+	
+	/**
+	 * 메인페이지
+	 * */
+	@GetMapping("/user/index")
+	public String selectUserMain() {
+		return "user/index";
+	}
+	
+	
+	/**
+	 * 회사소개
+	 * */
+	@GetMapping("/user/page/intro/contact")
+	public String selectUserContact() {
+		return "user/page/intro/contact";
+	}
+	
+	
+	/**
+	 * 후기게시판
+	 * */
+	@GetMapping("/user/page/board/review")
+	public String selectUserReviewBoard() {
+		return "user/page/board/review";
+	}
+	
+	/**
+	 * 후기게시글뷰
+	 * */
+	@GetMapping("/user/page/board/detail")
+	public String selectUserReviewDetail() {
+		return "user/page/board/review-detail";
+	}
+	
+}

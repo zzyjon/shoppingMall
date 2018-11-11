@@ -1,0 +1,141 @@
+package com.lsm.web.moosinsa.member;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+@Controller
+public class MemberController {
+
+	@Autowired
+	MemberService service;
+
+	// 파라미터값을 파싱해주는 어노테이션
+	/*
+	 * @InitBinder public void initBinder(WebDataBinder wdb) {
+	 * wdb.registerCustomEditor(int.class, new CustomNumberEditor(Integer.class,
+	 * true));
+	 * 
+	 * }
+	 */
+
+	// 회원 조회&검색기능
+	@GetMapping("/admin/page/member/memberList1")
+	public String memberList(Model model, @ModelAttribute("svo") MemberSVO svo, BindingResult result) {
+		// System.out.println("gender ==" + svo.getGender());
+		List<MemberVO> list = service.selectMemberList(svo);
+		System.out.println("보자보자" + list);
+		model.addAttribute("list", list);
+
+		return "admin/page/member/memberList1";
+
+	}
+
+	// 회원삭제기능
+	@PostMapping("/admin/page/member/memberDel")
+	public String memberDel(@ModelAttribute MemberVO vo) {
+		service.SelectMemberDelete(vo);
+		return "admin/page/member/memberList1";
+	}
+
+	// 등급삭제기능
+	@PostMapping("/admin/page/member/gradeDel")
+	public String gradeDel(@ModelAttribute MemberVO vo) {
+		service.selectGradeDelete(vo);
+		return "admin/page/member/memberGradeList";
+	}
+
+	// 멤버 등급 조회
+	@GetMapping("/admin/page/member/memberGradeList")
+	public String memberGradeList(Model model) {
+		List<MemberVO> list = service.selectMemberGradeList();
+		model.addAttribute("list", list);
+		return "admin/page/member/memberGradeList";
+	}
+
+	// 등급 추가 기능
+	@PostMapping("/admin/page/member/gradeInsert")
+	public ModelAndView memberGradeInsert(@ModelAttribute MemberVO vo, BindingResult result1) {
+		ModelAndView mav = new ModelAndView("jsonView");
+		int result = service.selectGradeInsert(vo);
+		if (result > 0) {
+			mav.addObject("result", "200");
+			mav.addObject("desc", "insert Succerss");
+		} else {
+			mav.addObject("result", "100");
+			mav.addObject("desc", "insert fail");
+		}
+
+		return mav;
+	}
+
+	// 회원 등급 수정
+	@PostMapping("/admin/page/member/gradeUpdate")
+	public ModelAndView memberGradeUpdate(@ModelAttribute MemberVO vo) {
+		ModelAndView mav = new ModelAndView("jsonView");
+		int result = service.selectGradeUpdate(vo);
+		if (result > 0) {
+			mav.addObject("result", "200");
+			mav.addObject("desc", "update success");
+
+		} else {
+			mav.addObject("result", "201");
+			mav.addObject("desc", "update fail");
+		}
+
+		return mav;
+	}
+
+	//회원가입페이지
+	@GetMapping("/user/page/member/memberRegistView")
+	public String memberRegisterView() {
+		return "user/page/member/memberRegist";
+	}
+
+	// 회원 가입 처리
+	@PostMapping("/user/page/member/memberRegist")
+	public ModelAndView memberRegister(@ModelAttribute MemberVO vo) {
+		ModelAndView mav = new ModelAndView("jsonView");
+		int result = service.insertMemberRegist(vo);
+		if (result > 0) {
+			mav.addObject("result", "300");
+			mav.addObject("desc", "insert success");
+
+		} else {
+			mav.addObject("result", "301");
+			mav.addObject("desc", "insert fail");
+		}
+
+		return mav;
+	}
+	// 회원가입 중복체크
+	
+	@PostMapping("/user/page/member/memberIdCheck")
+	public ModelAndView memberIdCheck(@ModelAttribute MemberVO vo) {
+		ModelAndView mav = new ModelAndView("jsonView");
+		int result = service.selectIdNickCheck(vo);
+		System.out.println(vo.getmId());
+		if(result > 0) {
+			mav.addObject("result", "200");
+			mav.addObject("desc", "insert success");
+		}else {
+			mav.addObject("result", "201");
+			mav.addObject("desc", "insert success");
+		}
+		return mav;
+	}
+	
+	//임시
+	@GetMapping("/user/page/member/templete")
+	public String regsuc() {
+		return "user/page/member/templete";
+	}
+
+}

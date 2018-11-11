@@ -1,0 +1,22 @@
+package com.lsm.web.order;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.lsm.web.admin.AdminVO;
+
+@Service
+public class OrderService {
+
+	@Autowired
+	OrderDAO dao;
+	
+	/**
+	 * 유저 정보 출력
+	 * */
+	public AdminVO selectUserInfo(String id){
+		return dao.selectUserInfo(id);
+	}
+}

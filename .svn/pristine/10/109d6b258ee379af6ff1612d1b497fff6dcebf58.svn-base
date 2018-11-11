@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="board">
+
+	<!-- 리뷰 쓰기 -->
+	<insert id="insertReviewBoard" parameterType="com.lsm.web.board.ReviewVO" >
+	insert into review_board 
+	(p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_img1 ) 
+	values 
+	(#{pNo}, #{mId}, #{rWriter}, #{rTitle}, #{rContent}, #{rAvgScore}, #{rImg1} );
+	</insert>
+	
+	<!-- 상품 리뷰 전체 뿌리기 -->
+	<select id="selectReviewList" parameterType="hashmap" resultType="com.lsm.web.board.ReviewVO">
+	select r.r_no, r.p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_write_date , r_viewcount, r_img1, p.p_img1, (select count(*) as cnt from review_board_comment where r_no = r.r_no) as replecount 
+	from review_board as r inner join product as p
+	on r.p_no = p.p_no
+	order by r_write_date desc
+	limit #{limit} offset #{offset}
+	</select>
+	
+	<!-- 상품 리뷰 검색  -->
+	<select id="selectReviewSearch" parameterType="hashmap" resultType="com.lsm.web.board.ReviewVO">
+	select r.r_no, r.p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_write_date , r_viewcount, r_img1, p.p_img1, (select count(*) as cnt from review_board_comment where r_no = r.r_no) as replecount 
+	from review_board as r inner join product as p
+	on r.p_no = p.p_no
+	<if test="(searchOption != null or searchOption != '') and searchOption == 'writer'">
+	where r_writer = #{keyword} or m_id = #{keyword}
+	</if>
+	<if test="(searchOption != null or searchOption != '') and searchOption == 'title'">
+	where r_title like concat('%', #{keyword}, '%')
+	</if>
+	order by r_write_date desc
+	limit #{limit} offset #{offset}
+	</select>
+	
+	<!-- 상품별 리뷰 뿌리기 -->
+	<select id="selectProductReview" resultType="com.lsm.web.board.ReviewVO">
+	select r_no, p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_write_date 
+	from review_board
+	where p_no = #{pNo};
+	</select>
+	
+	<!-- 상품별 리뷰 갯수  -->
+	<select id="countProductReview" resultType="int">
+	select count(*) as cnt from review_board where p_no = #{pNo}; 
+	</select>
+	
+	<!-- 전체 리뷰글 갯수 페이징용 -->
+	<select id="countAllReview" resultType="int">
+	select count(*) as cnt from review_board
+	</select>
+	
+	<!-- 리뷰 검색 결과 갯수 페이징용 -->
+	<select id="countSearchReview" parameterType="com.lsm.web.board.ReviewSVO" resultType="int">
+	select count(*) as cnt from review_board
+	<if test="(searchOption != null or searchOption != '') and searchOption == 'writer'">
+	where r_writer = #{keyword} or m_id = #{keyword}
+	</if>
+	<if test="(searchOption != null or searchOption != '') and searchOption == 'title'">
+	where r_title like concat('%',#{keyword},'%')
+	</if>
+	</select>
+	
+	<!-- 리뷰글 조회수 증가 -->
+	<update id="increaseViewCount">
+	update review_board set r_viewcount = r_viewcount + 1 where r_no = #{rNo};
+	</update>
+	
+	<!-- 리뷰글 디테일 뷰 -->
+	<select id="reviewDetailview" resultType="com.lsm.web.board.ReviewVO">
+	select r_no, p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_write_date , r_viewcount, r_img1
+	from review_board 
+	where r_no = #{rNo};    
+	</select>
+	
+	<!-- 리뷰 수정 -->
+	<update id="updateReview" parameterType="com.lsm.web.board.ReviewVO">
+	UPDATE review_board 
+	SET r_title = #{rTitle}, r_content = #{rContent}, r_avg_score = #{rAvgScore} , r_modi_date = current_timestamp()
+	WHERE r_no = #{rNo};
+	</update>
+	
+	<!-- 글 수정,삭제 버튼 글쓴 아이디만 보이기  -->
+	<select id="selectCheckWriter" resultType="String">
+	select m_id from review_board where r_no = #{rNo};
+	</select>
+	
+	<!-- 리뷰 삭제 -->
+	<delete id="deleteReview" parameterType="int">
+	delete from review_board where r_no = #{rNo};
+	</delete>
+	
+	<!-- 댓글 목록 출력 -->
+	<select id="selectCommentList" parameterType="int" resultType="com.lsm.web.board.ReviewCommentVO">
+	SELECT rbc_no, r_no, rbc_content, rbc_writer, regdate FROM review_board_comment where r_no = #{rNo};
+	</select>
+	
+	<!-- 댓글 갯수  -->
+	<select id="selectCountComment" parameterType="int" resultType="int">
+	select count(*) as cnt from review_board_comment where r_no = #{rNo};
+	</select>
+	
+	<!-- 댓글 작성 -->
+	<insert id="insertComment" parameterType="com.lsm.web.board.ReviewCommentVO" >
+	INSERT INTO review_board_comment 
+        ( r_no, rbc_content, rbc_writer, regdate)
+        VALUES 
+        (#{rNo}, #{rbcContent}, #{rbcWriter}, now());
+	</insert>
+	
+	<!-- 댓글 수정 -->
+	<update id="updateComment" parameterType="com.lsm.web.board.ReviewCommentVO" >
+	update review_board_comment set rbc_content = #{rbcContent} where rbc_no = #{rbcNo};
+	</update>
+	
+	<!-- 댓글 삭제  -->
+	<delete id="deleteComment" parameterType="int">
+	delete from review_board_comment where rbc_no = #{rbcNo};      
+	</delete>
+	
+</mapper>
+

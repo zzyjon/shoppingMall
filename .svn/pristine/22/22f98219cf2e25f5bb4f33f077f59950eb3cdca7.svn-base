@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="moosinsa_members">
+
+	<select id="selectMemberList" parameterType="com.lsm.web.moosinsa.member.MemberSVO"
+		resultType="com.lsm.web.moosinsa.member.MemberVO">
+
+		select
+		m_no,
+		m_id,
+		m_grade,
+		m_name,
+		m_nick,
+		m_gender,
+		m_email,
+		m_phone,
+		m_point,
+		m_post,
+		m_birth,
+		m_main_address,
+		m_sub_address,
+		m_buy_sum,
+		m_visit_count,
+		m_post,
+		m_reg_date,
+		m_out_date,
+		m_bann_date,
+		m_login_date
+		from member
+		where 1 =1
+
+		<!-- 키워드검색 -->
+		<if test="memberSearchKeyType != null and memberSearchKeyType == 'all'">
+
+			and m_name= #{memberSearchKeyWord}
+			OR
+			m_nick=#{memberSearchKeyWord}
+			OR
+			m_id= #{memberSearchKeyWord}
+
+		</if>
+		<if test="memberSearchKeyType != null and memberSearchKeyType == 'name'">
+			and m_name= #{memberSearchKeyWord}
+		</if>
+		<if test="memberSearchKeyType != null and memberSearchKeyType == 'nick'">
+			and m_nick= #{memberSearchKeyWord}
+		</if>
+		<if test="memberSearchKeyType != null and memberSearchKeyType == 'id'">
+			and m_id = #{memberSearchKeyWord}
+		</if>
+
+		<!-- 구매금액 검색 -->
+
+		<if
+			test="(buySumMin != null and buySumMin  != 0) and (buySumMax != null and buySumMax != 0)">
+			<![CDATA[
+			and m_buy_sum between #{buySumMin} and #{buySumMax}
+			]]>
+		</if>
+		<if test="buySumMin != null and buySumMin != 0"> 
+			<![CDATA[ and m_buy_sum >= #{buySumMin} ]]>
+		</if>
+		<if test="buySumMax != null and buySumMax != 0"> 
+			<![CDATA[ and m_buy_sum <= #{buySumMax} ]]>
+		</if>
+
+
+		<!-- 적립금 검색 -->
+
+		<if
+			test="(pointMin != null and pointMin != 0) and (pointMax != null and pointMax != 0)">
+			<![CDATA[
+			and m_point between #{pointMin} and #{pointMax}
+			]]>
+		</if>
+		<if test="pointMin != null and pointMin != 0"> 
+			<![CDATA[ and m_point >= #{pointMin} ]]>
+		</if>
+		<if test="pointMax != null and pointMax != 0"> 
+			<![CDATA[ and m_point <= #{pointMax} ]]>
+		</if>
+
+		<!-- 가입날짜 조회 -->
+		<if
+			test="(regDateStart != null and regDateStart !='') and (regDateEnd != null and regDateEnd != '')">
+		<![CDATA[
+			and m_reg_date between #{regDateStart} and #{regDateEnd}
+			]]>
+		</if>
+		<if test="regDateStart != null and regDateStart != ''">
+			<![CDATA[ and DATE(m_reg_date) >= #{regDateStart} ]]>
+		</if>
+		<if test="regDateEnd != null and regDateEnd != ''">
+			<![CDATA[ and DATE(m_reg_date) <= #{regDateEnd} ]]>
+		</if>
+
+		<!-- 최종로그인 날짜 조회 -->
+		<if
+			test="(loginDateStart != null and loginDateStart !='') and (loginDateEnd != null and loginDateEnd != '')">
+		<![CDATA[
+			and m_reg_date between #{loginDateStart} and #{loginDateEnd}
+			]]>
+		</if>
+		<if test="loginDateStart != null and loginDateStart != ''">
+			<![CDATA[ and DATE(m_login_date) >= #{loginDateStart} ]]>
+		</if>
+		<if test="loginDateEnd != null and loginDateEnd != ''">
+			<![CDATA[ and DATE(m_login_date) <= #{loginDateEnd} ]]>
+		</if>
+
+		
+		
+		<if test="gender != null and gender == 'M'">
+			<![CDATA[ and m_gender = 'M' ]]>
+		</if>
+		<if test="gender != null and gender == 'W'">
+			<![CDATA[ and m_gender = 'W' ]]>
+		</if> 
+
+	</select>
+	
+	<!-- 회원 삭제 기능  -->
+	<select id="selectMemberDelete" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		
+		delete from member where m_no = #{mNo}
+		</select>
+
+
+
+</mapper>

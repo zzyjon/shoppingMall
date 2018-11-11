@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="board">
+
+	<!-- 리뷰 쓰기 -->
+	<insert id="insertReviewBoard" parameterType="com.lsm.web.board.ReviewVO" >
+	insert into review_board 
+	(p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_img1 ) 
+	values 
+	(#{pNo}, #{mId}, #{rWriter}, #{rTitle}, #{rContent}, #{rAvgScore}, #{rImg1} );
+	</insert>
+	
+	<!-- 상품별 리뷰 뿌리기 -->
+	<select id="selectProductReview" resultType="com.lsm.web.board.ReviewVO">
+	select r_no, p_no, m_id, r_writer, r_title, r_content, r_avg_score, r_write_date 
+	from review_board 
+	where p_no = #{pNo};
+	</select>
+	
+	<!-- 상품별 리뷰 갯수  -->
+	<select id="countProductReview" resultType="int">
+	select count(*) as cnt from review_board where p_no = #{pNo}; 
+	</select>
+</mapper>
+

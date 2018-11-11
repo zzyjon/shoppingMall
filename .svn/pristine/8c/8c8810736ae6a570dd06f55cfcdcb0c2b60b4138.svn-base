@@ -1,0 +1,21 @@
+package com.lsm.web.order;
+
+public class OrderVO {
+
+	private int oCode;	//주문번호
+	private String cCode;	//쿠폰번호
+	private String mId;		//회원아이디
+	private String oName;	//회원이름
+	private String oPhone; //회원연락처
+	private int oPurchaseMethod; // 결제방법
+	private String oDepositor;	//	입금자
+	private String oReceiveName;	//받는사람이름
+	private String oReceivePhone;	//받는사람연락처
+	private String oReceivePost;	//받는사람우편번호
+	private String oReceiveMainAddress; //받는사람 기본주소
+	private String oReceiveSubAddress;	//받는사람 상세주소
+	private String oRequirements;	//요청사항
+	private int oCount;	//상품 개별 구매 수량
+	private int oProductAmount;	//상품 총 금액
+	private int oCouponSaveAmount;	//쿠폰 할인 금액
+}

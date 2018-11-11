@@ -1,0 +1,33 @@
+package com.lsm.web.board;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ReviewService {
+
+	@Autowired
+	ReviewDAO dao;
+	
+	/**
+	 * 상품 리뷰글 작성
+	 * */
+	public int insertReviewBoard(ReviewVO vo) {
+		return dao.insertReviewBoard(vo);
+	}
+	
+	/**
+	 * 상품별 리뷰 뿌리기
+	 * */
+	public List<ReviewVO> selectProductReview(int pNo){
+		return dao.selectProductReview(pNo);
+	}
+	/**
+	 * 상품별 리뷰 갯수
+	 * */
+	public int countProductReview(int pNo) {
+		return dao.countProductReview(pNo);
+	}
+}

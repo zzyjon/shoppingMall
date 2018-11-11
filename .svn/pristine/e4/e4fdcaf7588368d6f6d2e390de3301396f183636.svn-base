@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="moosinsa_members">
+	<!-- 회원정보보기 -->
+	<select id="selectMemberList" parameterType="com.lsm.web.moosinsa.member.MemberSVO"
+		resultType="com.lsm.web.moosinsa.member.MemberVO">
+<![CDATA[
+		select
+		m_no,
+		m_id,
+		m_pw,
+		m_name,
+		m_nick,
+		m_gender,
+		m_birth,
+		m_email,
+		m_phone,
+		m_post,
+		m_point,
+		m_grade,
+		m_main_address,
+		m_sub_Address,
+		m_reg_date,
+		m_login_date,
+		g_buy_max_price,
+		m_buy_sum,
+		m_visit_count
+		from member inner join grade
+		on m_buy_sum>=g_buy_min_price and m_buy_sum<=g_buy_max_price and 1=1
+]]>
+		<!-- 키워드검색 -->
+		<if test="memberSearchKeyType != null and memberSearchKeyType == 'all'">
+
+			and m_name= #{memberSearchKeyWord}
+			OR
+			m_nick=#{memberSearchKeyWord}
+			OR
+			m_id= #{memberSearchKeyWord}
+
+		</if>
+		<if test="memberSearchKeyType != null and memberSearchKeyType == 'name'">
+			and m_name= #{memberSearchKeyWord}
+		</if>
+		<if test="memberSearchKeyType != null and memberSearchKeyType == 'nick'">
+			and m_nick= #{memberSearchKeyWord}
+		</if>
+		<if test="memberSearchKeyType != null and memberSearchKeyType == 'id'">
+			and m_id = #{memberSearchKeyWord}
+		</if>
+
+		<!-- 구매금액 검색 -->
+
+		<if
+			test="(buySumMin != null and buySumMin  != 0) and (buySumMax != null and buySumMax != 0)">
+			<![CDATA[
+			and m_buy_sum between #{buySumMin} and #{buySumMax}
+			]]>
+		</if>
+		<if test="buySumMin != null and buySumMin != 0"> 
+			<![CDATA[ and m_buy_sum >= #{buySumMin} ]]>
+		</if>
+		<if test="buySumMax != null and buySumMax != 0"> 
+			<![CDATA[ and m_buy_sum <= #{buySumMax} ]]>
+		</if>
+
+		<!-- 성별 검색 -->
+		<if test="gender != null and gender !=''"> 
+			<![CDATA[ and m_gender = #{gender} ]]>
+		</if>
+
+
+		<!-- 적립금 검색 -->
+
+		<if
+			test="(pointMin != null and pointMin != 0) and (pointMax != null and pointMax != 0)">
+			<![CDATA[
+			and m_point between #{pointMin} and #{pointMax}
+			]]>
+		</if>
+		<if test="pointMin != null and pointMin != 0"> 
+			<![CDATA[ and m_point >= #{pointMin} ]]>
+		</if>
+		<if test="pointMax != null and pointMax != 0"> 
+			<![CDATA[ and m_point <= #{pointMax} ]]>
+		</if>
+
+		<!-- 가입날짜 조회 -->
+		<if
+			test="(regDateStart != null and regDateStart !='') and (regDateEnd != null and regDateEnd != '')">
+		<![CDATA[
+			and m_reg_date between #{regDateStart} and #{regDateEnd}
+			]]>
+		</if>
+		<if test="regDateStart != null and regDateStart != ''">
+			<![CDATA[ and DATE(m_reg_date) >= #{regDateStart} ]]>
+		</if>
+		<if test="regDateEnd != null and regDateEnd != ''">
+			<![CDATA[ and DATE(m_reg_date) <= #{regDateEnd} ]]>
+		</if>
+
+		<!-- 최종로그인 날짜 조회 -->
+		<if
+			test="(loginDateStart != null and loginDateStart !='') and (loginDateEnd != null and loginDateEnd != '')">
+		<![CDATA[
+			and m_reg_date between #{loginDateStart} and #{loginDateEnd}
+			]]>
+		</if>
+		<if test="loginDateStart != null and loginDateStart != ''">
+			<![CDATA[ and DATE(m_login_date) >= #{loginDateStart} ]]>
+		</if>
+		<if test="loginDateEnd != null and loginDateEnd != ''">
+			<![CDATA[ and DATE(m_login_date) <= #{loginDateEnd} ]]>
+		</if>
+
+		<!-- 방문횟수 조회 -->
+		<if
+			test="(visitCountStart != null and visitCountStart != 0) and (visitCountEnd != null and visitCountEnd != 0)">
+			<![CDATA[
+			and m_visit_count between #{visitCountStart} and #{visitCountStart}
+			]]>
+		</if>
+		<if test="visitCountStart != null and visitCountStart != 0"> 
+			<![CDATA[ and m_visit_count >= #{visitCountStart} ]]>
+		</if>
+		<if test="visitCountEnd != null and visitCountEnd != 0"> 
+			<![CDATA[ and m_visit_count <= #{visitCountEnd} ]]>
+		</if>
+
+
+
+
+	</select>
+
+	<!-- 탈퇴회원 조회 -->
+	<select id="selectMemberOutView" resultType="com.lsm.web.moosinsa.member.MemberVO">
+		select
+		mo_no,mo_id,mo_name,mo_method,mo_reason,mo_out_date from member_out
+	</select>
+
+
+
+
+	<!-- 회원 삭제 기능 -->
+	<delete id="selectMemberDelete" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+
+		delete from member
+		where m_no = #{mNo}
+	</delete>
+
+
+
+
+	<!-- 회원 등급 조회 -->
+	<select id="selectMemberGradeList" resultType="com.lsm.web.moosinsa.member.MemberVO">
+		<![CDATA[
+		select
+		g_no,g.m_grade, ifnull(t.cnt, 0) as cnt,g_buy_min_price,g_buy_max_price,g_discount,g_save_point
+		from grade as g left join (
+		select m_grade,count(m_no) as cnt from member,grade where m_buy_sum>=g_buy_min_price and m_buy_sum<=g_buy_max_price group by m_grade
+		) as t
+		on g.m_grade = t.m_grade
+		
+		 ]]>
+	</select>
+
+	<!-- 회원 등급 추가 -->
+	<insert id="selectGradeInsert" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		insert into
+		grade(m_grade,g_buy_min_price,g_buy_max_price,g_discount,g_save_point)
+		values
+		(#{mGrade},#{gBuyMinPrice},#{gBuyMaxPrice},#{gDiscount},#{gSavePoint})
+
+	</insert>
+
+
+
+	<!-- 등급 삭제 기능 -->
+	<select id="selectGradeDelete" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+
+		delete from grade
+		where g_no = #{gNo}
+	</select>
+
+	<!-- 회원 정보보기 -->
+	<select id="selectMemberView" parameterType="com.lsm.web.moosinsa.member.MemberVO"
+		resultType="com.lsm.web.moosinsa.member.MemberVO">
+		<![CDATA[
+		select
+		m_no,
+		m_id,
+		m_pw,
+		m_name,
+		m_nick,
+		m_gender,
+		m_birth,
+		m_email,
+		m_phone,
+		m_post,
+		m_point,
+		m_grade,
+		m_main_address,
+		m_sub_Address,
+		m_reg_date,
+		m_login_date,
+		g_buy_max_price,
+		m_buy_sum,
+		mo_method,
+		mo_reason,
+		mo_out_date
+		from member left join member_out on m_id=mo_id inner join grade
+		on m_buy_sum>=g_buy_min_price and m_buy_sum<=g_buy_max_price
+		and
+		m_id = #{mId};
+		
+		]]>
+	</select>
+
+	<!-- 회원 정보 수정 -->
+	<update id="updateMemberInfo" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		update member set
+		m_pw=sha(#{mPw}),
+		m_eMail=#{mEmail},
+		m_phone=#{mPhone},
+		m_post=#{mPost},
+		m_main_address=#{mMainAddress},
+		m_sub_address=#{mSubAddress}
+		where m_id
+		= #{mId}
+
+	</update>
+
+	<!-- 회원 가입 -->
+
+	<insert id="insertMemberRegist" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		insert into member
+		(
+		m_id,
+		m_pw,
+		m_gender,
+		m_name,
+		m_nick,
+		m_birth,
+		m_email,
+		m_phone,
+		m_post,
+		m_main_address,
+		m_sub_address,
+		m_reg_date
+		) values(
+		#{mId},
+		sha(#{mPw}),
+		#{mGender},
+		#{mName},
+		#{mNick},
+		#{mBirth},
+		#{mEmail},
+		#{mPhone},
+		#{mPost},
+		#{mMainAddress},
+		#{mSubAddress},
+		current_timestamp
+		)
+
+
+	</insert>
+
+	<!-- 아이디 & 별명중복체크 -->
+	<select id="selectIdNickCheck" resultType="Integer"
+		parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		select count(*) as cntCheck from member where 1=1 and
+		m_id = #{mId}
+
+
+
+	</select>
+
+	<!-- 로그인 세션 처리 -->
+	<select id="selectSessionLogin" parameterType="com.lsm.web.moosinsa.member.MemberVO"
+		resultType="com.lsm.web.moosinsa.member.MemberVO">
+		<![CDATA[
+		select m_id,m_name,m_grade,m_visit_count,m_login_date,m_point,DATE_ADD(m_reg_date, INTERVAL +3 day) as can_out
+		from member inner join grade
+		on m_buy_sum>=g_buy_min_price and m_buy_sum<=g_buy_max_price
+		and m_id = #{mId} and m_pw = sha(#{mPw})
+		]]>
+	</select>
+
+	<!-- 로그인시 방문횟수 +1 -->
+	<update id="updateVistCount" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+
+		update member set
+		m_visit_count = m_visit_count+1
+		where m_id = #{mId} and m_pw =
+		sha(#{mPw})
+
+	</update>
+
+	<!-- 로그인 날짜 업데이트 -->
+	<update id="updateLoginDate" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		update member set
+		m_login_date = current_timestamp
+		where m_id = #{mId}
+
+
+	</update>
+
+	<!-- 아이디/패스워드 찾기 -->
+	<select id="selectSearchUserInfo" parameterType="com.lsm.web.moosinsa.member.MemberVO"
+		resultType="com.lsm.web.moosinsa.member.MemberVO">
+
+		select
+		m_id,
+		m_name,
+		m_reg_date,
+		(select count(m_id) from member where
+		m_name = #{mName} and m_email =
+		#{mEmail} )as cnt_mid
+		from member where
+		m_name = #{mName} and m_email = #{mEmail}
+		<if test="mId != null and mId == ''">
+			and m_id = #{mId}
+		</if>
+
+
+	</select>
+	<!-- 관리자권한 회원정보수정 처리 -->
+	<update id="updateAdminMemberModify" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		update member set
+		m_no = m_no
+		<if test="mId != null and mId != ''">
+			,m_id = #{mId}
+		</if>
+		<if test="mName != null and mName != ''">
+			,m_name = #{mName}
+		</if>
+		<if test="mGender != null and mGender != ''">
+			,m_gender = #{mGender}
+		</if>
+		<if test="mPw != null and mPw != ''">
+			,m_pw = sha(#{mPw})
+		</if>
+		<if test="mBirth != null and mBirth != ''">
+			,m_birth = #{mBirth}
+		</if>
+		<if test="mEmail != null and mEmail != ''">
+			,m_email = #{mEmail}
+		</if>
+		<if test="mPhone != null and mPhone != ''">
+			,m_phone = #{mPhone}
+		</if>
+		<if test="mPost != null and mPost != ''">
+			,m_post = #{mPost}
+		</if>
+		<if test="mMainAddress != null and mMainAddress != ''">
+			,m_main_address = #{mMainAddress}
+		</if>
+		<if test="mSubAddress != null and mSubAddress != ''">
+			,m_sub_address = #{mSubAddress}
+		</if>
+		<if test="mPoint != null and mPoint != ''">
+			,m_point = #{mPoint}
+		</if>
+		<if test="mBuySum != null and mBuySum != ''">
+			,m_buy_sum = #{mBuySum}
+		</if>
+		where m_id=#{mId}
+
+	</update>
+
+
+
+
+
+	<!-- 내 정보 회원정보수정 처리 -->
+	<update id="updateMemberModify" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		update member set
+		m_no = m_no
+		<if test="mPwChange != null and mPwChange != ''">
+			,m_pw = sha(#{mPwChange})
+		</if>
+		<if test="mEmail != null and mEmail != ''">
+			,m_email = #{mEmail}
+		</if>
+		<if test="mPhone != null and mPhone != ''">
+			,m_phone = #{mPhone}
+		</if>
+		<if test="mPost != null and mPost != ''">
+			,m_post = #{mPost}
+		</if>
+		<if test="mMainAddress != null and mMainAddress != ''">
+			,m_main_address = #{mMainAddress}
+		</if>
+		<if test="mSubAddress != null and mSubAddress != ''">
+			,m_sub_address = #{mSubAddress}
+		</if>
+		where m_id=#{mId} and m_pw = sha(#{mPw});
+	</update>
+
+	<!-- 아이디 찾기 후 비밀번호 수정 -->
+	<update id="updatemPw" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		update member set m_pw =
+		sha(#{mPw}) where m_id=#{mId}
+
+	</update>
+
+	<!-- 회원등급 보기 -->
+	<select id="selectGradeView" resultType="com.lsm.web.moosinsa.member.MemberVO">
+	<![CDATA[
+		select g_no,m_grade,g_buy_min_price,g_buy_max_price,g_discount,g_save_point from grade
+		
+		
+	]]>
+
+	</select>
+	<!-- 관리자 회원등급 수정 보기(모달) -->
+	<select id="selectGradeViewModal" resultType="com.lsm.web.moosinsa.member.MemberVO">
+	<![CDATA[
+		select g_no,m_grade,g_buy_min_price,g_buy_max_price,g_discount,g_save_point from grade where g_no = #{gNo}
+		
+		
+	]]>
+
+	</select>
+	<!-- 관리자 회원 등급 수정 처리 -->
+	<update id="updateMemberGrade" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		update grade set
+		g_no = g_no
+		<if test="mGrade != null and mGrade != ''">
+			,m_grade = #{mGrade}
+		</if>
+		<if test="gBuyMinPrice != null and gBuyMinPrice != ''">
+			,g_buy_min_price = #{gBuyMinPrice}
+		</if>
+		<if test="gBuyMaxPrice != null and gBuyMaxPrice != ''">
+			,g_buy_max_price = #{gBuyMaxPrice}
+		</if>
+		<if test="gDiscount != null and gDiscount != ''">
+			,g_discount = #{gDiscount}
+		</if>
+		<if test="gSavePoint != null and gSavePoint != ''">
+			,g_save_point = #{gSavePoint}
+		</if>
+		where g_no = #{gNo}
+
+	</update>
+
+
+	<!-- 내회원등급 보기(detail) -->
+	<select id="selectGradeViewDetail" parameterType="com.lsm.web.moosinsa.member.MemberVO"
+		resultType="com.lsm.web.moosinsa.member.MemberVO">
+	<![CDATA[
+		select m_id,m_name,m_grade,m_buy_sum,g_buy_max_price,
+		(select ifnull((select g_buy_min_price from grade
+		where g_no = (
+		select
+		g_no + 1
+		from member inner join grade
+		on m_buy_sum>=g_buy_min_price and m_buy_sum<=g_buy_max_price
+		and
+		m_id = #{mId})),0)
+		-
+		(select m_buy_sum
+		from member
+		where m_id = #{mId}
+		)) as remain_price,
+		(select ifnull((select m_grade from grade
+		where g_no = (
+		select
+		g_no + 1
+		from member inner join grade
+		on m_buy_sum>=g_buy_min_price and m_buy_sum<=g_buy_max_price
+		and
+		m_id = #{mId})),0))as next_grade from member inner join grade
+		on m_buy_sum>=g_buy_min_price and m_buy_sum<=g_buy_max_price
+		and
+		m_id = #{mId}
+	]]>
+	</select>
+	<!-- 탈퇴회원 가입일짜 체크 -->
+	<select id="selectOutCheck" parameterType="com.lsm.web.moosinsa.member.MemberVO"
+		resultType="com.lsm.web.moosinsa.member.MemberVO">
+		select m_id from member where m_id=#{mId} and m_pw =
+		sha(#{mPw})
+		and current_timestamp>DATE_ADD(m_reg_date, INTERVAL +3
+		day)
+	</select>
+
+	<!-- 내정보 회원탈퇴 처리 -->
+	<delete id="deleteMemberOutSelf" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		delete from
+		member where m_id = #{mId} and m_pw = sha(#{mPw}) and
+		current_timestamp>DATE_ADD(m_reg_date, INTERVAL +3 day)
+
+	</delete>
+	<!-- 탈퇴회원 추가 -->
+	<insert id="insertMemberOut" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		insert into
+		member_out(mo_id,mo_name,mo_reason,mo_method,mo_out_date)
+		values
+		(#{mId},#{mName},#{moReason},'본인 탈퇴',current_timestamp);
+
+	</insert>
+	<!-- 추방회원 추가 -->
+	<insert id="insertMemberBann" parameterType="com.lsm.web.moosinsa.member.MemberVO">
+		insert into
+		member_out(mo_id,mo_name,mo_method,mo_out_date)
+		values
+		(#{mId},#{mName},'관리자 추방',current_timestamp);
+
+	</insert>
+
+
+
+
+	<!-- 통계 -->
+
+	<!-- 어제 오늘 날짜 -->
+	<select id="selectDays" resultType="com.lsm.web.moosinsa.member.MemberVO">
+	<![CDATA[
+	select DATE_ADD(curdate(), INTERVAL -2 day) as days from member group by days
+union all
+select DATE_ADD(curdate(), INTERVAL -1 day) as days from member group by days
+	]]>
+
+	</select>
+	<!-- 어제 매출,회원가입수,회원탈퇴수,주문수,결제완건수,배송건수 -->
+	<select id="selectOnedayAgo" resultType="com.lsm.web.moosinsa.member.MemberVO">
+	<![CDATA[
+		select ifnull(sum(o_product_amount),0) as oneday from orders where
+		DATE_FORMAT(o_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -1
+		day)
+		union all
+		select count(*) from member where DATE_FORMAT(m_reg_date, '%Y-%m-%d' ) =
+		DATE_ADD(curdate(), INTERVAL -1 day)
+		union all
+		select count(mo_id) from member_out where DATE_FORMAT(mo_out_date,
+		'%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -1 day)
+		union all
+		select count(*) from orders where DATE_FORMAT(o_date, '%Y-%m-%d' ) =
+		DATE_ADD(curdate(), INTERVAL -1 day)
+		union all
+		select count(*) from orders
+		where DATE_FORMAT(o_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -1
+		day) and o_status =0
+		union all
+		select count(*) from orders
+		where DATE_FORMAT(o_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -1
+		day) and o_status =1
+		]]>
+	</select>
+
+	<!-- 엇그제 매출,회원가입수,회원탈퇴수,주문수,결제완건수,배송건수 -->
+	<select id="selectTwodayAgo" resultType="com.lsm.web.moosinsa.member.MemberVO">
+	
+	<![CDATA[
+		select ifnull(sum(o_product_amount),0) as twoday from orders where DATE_FORMAT(o_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -2 day)
+union all
+select count(*) from member where DATE_FORMAT(m_reg_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -2 day)
+union all
+select count(mo_id) from member_out where DATE_FORMAT(mo_out_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -2 day)
+union all
+select count(*) from orders where DATE_FORMAT(o_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -2 day)
+union all
+select count(*)  from orders  
+where DATE_FORMAT(o_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -2 day) and o_status =0
+union all
+select count(*) from orders  
+where DATE_FORMAT(o_delivery_finish, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -2 day) and o_status =1
+		]]>
+
+	</select>
+
+	<!-- 오늘 매출,회원가입수,회원탈퇴수,주문수,결제완건수,배송건수 -->
+	<select id="selectToday" resultType="com.lsm.web.moosinsa.member.MemberVO">
+	
+	<![CDATA[
+		select ifnull(sum(o_product_amount),0) as today from orders where DATE_FORMAT(o_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -0 day)
+union all
+select count(*) from member where DATE_FORMAT(m_reg_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -0 day)
+union all
+select count(mo_id) from member_out where DATE_FORMAT(mo_out_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -0 day)
+union all
+select count(*) from orders where DATE_FORMAT(o_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -0 day)
+union all
+select count(*)  from orders  
+where DATE_FORMAT(o_date, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -0 day) and o_status =0
+union all
+select count(*) from orders  
+where DATE_FORMAT(o_delivery_finish, '%Y-%m-%d' ) = DATE_ADD(curdate(), INTERVAL -0 day) and o_status =1
+		]]>
+
+	</select>
+
+	<!-- 이번주 매출,회원가입수,회원탈퇴수,주문수,결제완건수,배송건수 -->
+	<select id="selectWeek" resultType="com.lsm.web.moosinsa.member.MemberVO">
+	
+	<![CDATA[
+				select ifnull(sum(o_product_amount),0) as week from orders where DATE_FORMAT(o_date, '%Y-%m-%d' ) >= DATE_ADD(curdate(), INTERVAL -7 day)
+union all
+select count(*) from member where DATE_FORMAT(m_reg_date, '%Y-%m-%d' ) >= DATE_ADD(curdate(), INTERVAL -7 day)
+union all
+select count(mo_id) from member_out where DATE_FORMAT(mo_out_date, '%Y-%m-%d' ) >= DATE_ADD(curdate(), INTERVAL -7 day)
+union all
+select count(*) from orders where DATE_FORMAT(o_date, '%Y-%m-%d' ) >= DATE_ADD(curdate(), INTERVAL -7 day)
+union all
+select count(*)  from orders  
+where DATE_FORMAT(o_date, '%Y-%m-%d' ) >= DATE_ADD(curdate(), INTERVAL -7 day) and o_status =0
+union all
+select count(*) from orders  
+where DATE_FORMAT(o_delivery_finish, '%Y-%m-%d' ) >= DATE_ADD(curdate(), INTERVAL -7 day) and o_status =1
+		]]>
+
+	</select>
+
+
+
+	<!-- 이번달 매출,회원가입수,회원탈퇴수,주문수,결제완건수,배송건수 -->
+	<select id="selectMonth" resultType="com.lsm.web.moosinsa.member.MemberVO">
+	
+	<![CDATA[
+		select sum(o_product_amount) as month from orders where DATE_FORMAT(curdate(), '%Y-%m' ) =  DATE_FORMAT(o_date, '%Y-%m' )
+union all
+select count(*) from member where DATE_FORMAT(curdate(), '%Y-%m' ) =  DATE_FORMAT(m_reg_date, '%Y-%m' )
+union all
+select count(*) from member_out where DATE_FORMAT(curdate(), '%Y-%m' ) =  DATE_FORMAT(mo_out_date, '%Y-%m' )
+union all
+select count(*) from orders where DATE_FORMAT(curdate(), '%Y-%m' ) =  DATE_FORMAT(o_date, '%Y-%m' )
+union all
+select count(*)  from orders where DATE_FORMAT(curdate(), '%Y-%m' ) =  DATE_FORMAT(o_date, '%Y-%m' ) and o_status =0
+union all
+select count(*)  from orders where DATE_FORMAT(curdate(), '%Y-%m' ) =  DATE_FORMAT(o_delivery_finish, '%Y-%m' ) and o_status =1
+		]]>
+
+	</select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

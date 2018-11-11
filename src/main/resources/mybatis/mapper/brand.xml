@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="brand">
+
+	<!-- 브랜드 목록 조회 -->
+	<select id="selectBrand" resultType="com.lsm.web.brand.BrandVO" >
+	select brand_no, brand_name from brand
+	</select>
+	
+	<!-- 브랜드 추가 -->
+	<insert id="insertBrand">
+	INSERT INTO brand (brand_name) VALUES (#{brandName});
+	</insert>
+	
+	<!-- 브랜드 갯수 카운트  -->
+	<select id="countBrand" resultType="Integer">
+	select count(*) as cnt from brand;
+	</select>
+	
+	<!-- 브랜드 수정 -->
+	<update id="updateBrand" parameterType="com.lsm.web.brand.BrandVO" >
+	UPDATE brand SET brand_name = #{brandName} WHERE brand_no = #{brandNo};
+	</update>
+	
+	<!-- 브랜드 삭제 -->
+	<delete id="deleteBrand" parameterType="com.lsm.web.brand.BrandVO">
+	DELETE FROM brand where brand_no = #{brandNo};
+	</delete>
+</mapper>
+

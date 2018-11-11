@@ -1,0 +1,35 @@
+package com.lsm.web.board;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class ReviewDAO {
+
+	@Autowired
+	SqlSession session;
+	
+	/**
+	 * 상품 리뷰글 작성
+	 * */
+	public int insertReviewBoard(ReviewVO vo) {
+		return session.insert("board.insertReviewBoard", vo);
+	}
+	
+	/**
+	 * 상품별 리뷰 뿌리기
+	 * */
+	public List<ReviewVO> selectProductReview(int pNo){
+		return session.selectList("board.selectProductReview", pNo);
+	}
+	
+	/**
+	 * 상품별 리뷰 갯수
+	 * */
+	public int countProductReview(int pNo) {
+		return session.selectOne("board.countProductReview", pNo);
+	}
+}

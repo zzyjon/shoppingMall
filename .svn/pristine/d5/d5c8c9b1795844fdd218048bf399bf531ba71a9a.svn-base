@@ -1,0 +1,44 @@
+/**
+ * 
+ */
+
+$(function() {
+	$("#selectColor").on(
+			"change",
+			function() {
+				var selectColor = $(this).find(
+						"option[value='" + $(this).val() + "']")
+						.text();
+				$("#pColor").val(selectColor);
+			});
+
+	/*selectbox 소재 선택시 값이 input으로 들어가는 기능 */
+	$("#selectMaterial").on(
+			"change",
+			function() {
+				var selectMaterial = $(this).find(
+						"option[value='" + $(this).val() + "']")
+						.text();
+				$("#pMaterial").val(selectMaterial);
+			});
+	
+	/*selectbox 제조사 선택시 값이 input으로 들어가는 기능 */
+	$("#selectMaker").on(
+			"change",
+			function() {
+				var selectMaker = $(this).find(
+						"option[value='" + $(this).val() + "']")
+						.text();
+				$("#pMaker").val(selectMaker);
+			});
+	
+	/*selectbox 브랜드 선택시 값이 input으로 들어가는 기능 */
+	$("#selectBrand").on(
+			"change",
+			function() {
+				var selectBrand = $(this).find(
+						"option[value='" + $(this).val() + "']")
+						.text();
+				$("#pBrand").val(selectBrand);
+			});
+})

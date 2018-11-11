@@ -1,0 +1,133 @@
+package com.lsm.web.order;
+
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.lsm.web.admin.AdminVO;
+import com.lsm.web.cart.CartVO;
+import com.lsm.web.common.CommonCheck;
+
+@Controller
+public class OrderController {
+
+	@Autowired
+	OrderService orderService;
+	
+	/**
+	 * 결제 정보 출력
+	 * */
+	@CommonCheck(isLogin="Y")
+	@GetMapping("/user/page/member/order")
+	public String insertOrder(HttpSession session, Model model ) {
+		
+		String id = (String)session.getAttribute("id");
+		AdminVO vo = orderService.selectUserInfo(id);	// 결제 회원 정보 출력
+		List<CartVO> cartList = orderService.selectProductInfo(id); // 주문 상품 뿌리기
+		int sumOrder = orderService.sumOrder(id);	// 결제 금액 총합 출력
+		int sumAmount = orderService.sumAmount(id);	// 결제 상품 총 갯수
+		
+		model.addAttribute("user", vo);
+		model.addAttribute("cart", cartList);
+		model.addAttribute("sumOrder", sumOrder);
+		model.addAttribute("sumAmount", sumAmount);
+		
+		return "user/page/member/order";
+	}
+	
+	/**
+	 * 결제 진행 
+	 * */
+	@PostMapping("/user/page/checkOut")
+	public String checkOut(@RequestParam int[] pNo,@RequestParam int[] amount, @RequestParam String[] pSize, @RequestParam String[] pColor, @ModelAttribute OrderVO paramVO, HttpSession session) {
+		
+		//ModelAndView mav = new ModelAndView("jsonView");
+		
+		// 기본 주문
+		String id = (String)session.getAttribute("id");
+		paramVO.setmId(id);
+		orderService.insertOrder(paramVO);
+		//System.out.println("ocode = " + paramVO.getoCode());
+
+		//디테일 주문 
+		for(int i = 0; i<pNo.length; i++) {
+			System.out.println("상품 번호 = "+pNo[i]);
+			OrderDetailVO vo = new OrderDetailVO();
+			vo.setpNo(pNo[i]);
+			vo.setpColor(pColor[i]);
+			vo.setpSize(pSize[i]);
+			vo.setAmount(amount[i]);
+			vo.setoCode(paramVO.getoCode());
+			
+			orderService.insertOrderDetail(vo);
+		}
+		
+		return "redirect:/user/page/member/orderList";
+	}
+	
+	/**
+	 * 사용자 주문 목록 출력 
+	 * */
+	@CommonCheck(isLogin="Y")
+	@RequestMapping("/user/page/member/orderList")
+	public String orderList(HttpSession session, Model model) {
+		String mId = (String)session.getAttribute("id");
+		List<OrderVO> orderList = orderService.selectOrderList(mId);
+		model.addAttribute("orderList", orderList);
+		
+		return "user/page/member/order-list";
+	}
+
+	/**
+	 * 사용자 주문 디테일 뷰
+	 * */
+	@RequestMapping("/user/page/member/orderDetail")
+	public String orderDetail(@RequestParam String oCode, Model model) {
+		
+		List<OrderVO> orderDetail = orderService.selectOrderDetailView(oCode);
+		model.addAttribute("orderDetail", orderDetail);
+		OrderVO orderVO = orderService.selectRecevieInfo(oCode);
+		model.addAttribute("receiveInfo", orderVO);
+		
+		return "user/page/member/order-detail";
+	}
+	
+	/**
+	 * 관리자 주문 목록 뿌리기
+	 * */
+	@RequestMapping("/admin/page/order")
+	public String adminOrderList(Model model) {
+		
+		List<OrderVO> orderList = orderService.selectAdminOrderList();
+		model.addAttribute("orderList", orderList);
+		
+		List<OrderVO> statusList = orderService.selectStatus();
+		model.addAttribute("statusList", statusList);	
+		
+		return "admin/page/order/order_list";
+	}
+	
+	/**
+	 * 관리자 주문 상세보기 
+	 * */
+	@RequestMapping("admin/page/orderDetail")
+	public String adminOrderDetail(@RequestParam String oCode, Model model) {
+		
+		List<OrderVO> detailList = orderService.selectAdminOrderDetail(oCode);
+		model.addAttribute("detailList", detailList);
+		OrderVO receiveInfo = orderService.selectRecevieInfo(oCode);
+		model.addAttribute("receiveInfo", receiveInfo);
+		
+		return "admin/page/order/order_detail";
+	}
+}

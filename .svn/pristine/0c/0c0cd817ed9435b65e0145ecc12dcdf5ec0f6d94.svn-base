@@ -1,0 +1,23 @@
+package com.lsm.web.order;
+
+import java.util.List;
+
+import org.apache.ibatis.session.SqlSession;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.lsm.web.admin.AdminVO;
+
+@Repository
+public class OrderDAO {
+
+	@Autowired
+	SqlSession session;
+	
+	/**
+	 * 유저 정보 출력
+	 * */
+	public AdminVO selectUserInfo(String id){
+		return session.selectOne("product.selectUserInfo", id);
+	}
+}

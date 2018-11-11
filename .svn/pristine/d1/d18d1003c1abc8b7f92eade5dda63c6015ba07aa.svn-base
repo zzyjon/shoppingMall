@@ -1,0 +1,128 @@
+package com.lsm.web.board;
+
+import java.util.HashMap;
+import java.util.List;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.lsm.web.common.CommonCheck;
+import com.lsm.web.common.Pagenation;
+
+@Controller
+public class ReviewController {
+
+	@Autowired
+	ReviewService reviewService;
+
+	
+	/**
+	 * 후기 작성 페이지 가기
+	 * */
+	@CommonCheck(isLogin="Y")
+	@GetMapping("/user/page/board/writer")
+	public String writer(@RequestParam(value="pNo") int pNo, Model model) {
+		
+		model.addAttribute("pNo", pNo);
+		
+		return "user/page/board/review-writer";
+	}
+	
+	/**
+	 * 후기 글 쓰기
+	 * */
+	@RequestMapping("/user/page/board/write")
+	public String insertReviewBoard(@ModelAttribute ReviewVO paramVO, HttpSession session) {
+		String mId = (String)session.getAttribute("id");
+		paramVO.setmId(mId);
+		String rWriter = (String)session.getAttribute("name");
+		paramVO.setrWriter(rWriter);
+		
+		/*System.out.println("pNo = "+paramVO.getpNo());
+		System.out.println(paramVO.getmId());
+		System.out.println(paramVO.getrWriter());
+		System.out.println(paramVO.getrTitle());
+		System.out.println(paramVO.getrContent());
+		System.out.println(paramVO.getrAvgScore());*/
+		
+		reviewService.insertReviewBoard(paramVO);
+		
+		return "user/page/board/review-writer";
+	}
+	
+	/**
+	 * 후기 글 전체 보기 - review페이지
+	 * */
+	@RequestMapping("/user/page/board/review")
+	public String selectReviewList(Model model, @RequestParam (value="currPage", defaultValue="1" ) int currPage) {
+		
+		/*페이징 기능 시작*/
+		Pagenation pg = new Pagenation();
+		pg.getStartPageNum();
+		pg.getLastPageNum();
+		pg.setTotalCount(reviewService.countAllReview()); // 총 목록 갯수
+		pg.setCurrPage(currPage);// 현재 페이지
+		pg.setCountPerPage(pg.getCountPerPage()); // 페이지 번호 갯수 
+		pg.setCountPerPage(5);
+		
+		model.addAttribute("paging", pg);
+		
+		HashMap<String, Object> hashmap = new HashMap<>();
+		
+		hashmap.put("limit", pg.getLimit());
+		hashmap.put("offset", pg.getOffset());
+		
+		List<ReviewVO> reviewList = reviewService.selectReviewList(hashmap);
+		model.addAttribute("reviewList", reviewList);
+		
+		return "user/page/board/review";
+	}
+	
+	/**
+	 * 후기게시글뷰
+	 * */
+	@CommonCheck(isLogin="Y")
+	@GetMapping("/user/page/board/detail")
+	public String selectUserReviewDetail(@RequestParam int rNo, Model model) {
+		
+		ReviewVO vo = reviewService.reviewDetailview(rNo);
+		
+		reviewService.increaseViewCount(rNo); //조회수 증가
+		
+		model.addAttribute("reviewDetail", vo);
+		
+		return "user/page/board/review-detail";
+	}
+	
+	/**
+	 * 후기 수정 페이지 가기
+	 * */
+	@CommonCheck(isLogin="Y")
+	@GetMapping("/user/page/board/modi")
+	public String modify(@RequestParam(value="rNo") int rNo, Model model) {
+		
+		ReviewVO vo = reviewService.reviewDetailview(rNo);
+		model.addAttribute("reviewDetail", vo);
+		
+		return "user/page/board/review-modify";
+	}
+	
+	/**
+	 * 후기 수정
+	 * */
+	@RequestMapping("/user/page/board/modify")
+	public String updateReview(@RequestParam ReviewVO paramVO) {
+		
+		reviewService.updateReview(paramVO);
+		
+		return "user/page/board/review";
+	}
+	
+}
